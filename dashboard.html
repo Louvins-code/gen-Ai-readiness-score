@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GenAI Readiness Score – Indian SMEs Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF2F6;--sf:#fff;--ink:#14213D;--mu:#4A5873;--ln:#C9D3E0;--ac:#0F766E;--mk:#F2A900;--b:#C9D3E0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1726;--sf:#17223A;--ink:#E8EEF7;--mu:#A3B1C8;--ln:#2C3B58;--ac:#4FD1C5;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F1726;--sf:#17223A;--ink:#E8EEF7;--mu:#A3B1C8;--ln:#2C3B58;--ac:#4FD1C5;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Figtree,system-ui,sans-serif}
+.w{max-width:1000px;margin:0 auto;padding:24px}
+h1,h2{font-family:'Bricolage Grotesque',Figtree,sans-serif;margin:0;line-height:1.1}
+h1{font-size:clamp(26px,5vw,40px);font-weight:800}h2{font-size:19px;margin-bottom:14px}
+.sub{color:var(--mu);margin:8px 0 20px;max-width:70ch}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+select,button{font:inherit;color:var(--ink);background:var(--sf);border:1px solid var(--ln);border-radius:4px;padding:8px 12px}
+select:focus-visible,button:focus-visible{outline:3px solid var(--mk);outline-offset:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.c,.p{background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:18px}
+.c .n{font:800 34px 'Bricolage Grotesque',Figtree,sans-serif}.c .l{color:var(--mu);font-size:14px}
+.g{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}@media(max-width:760px){.g{grid-template-columns:1fr}}
+.r{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;margin:7px 0;font-size:14px;background:none;border:0;width:100%;text-align:left;padding:2px 0;cursor:pointer}
+.r.p0{cursor:default}.t{height:16px;background:var(--bg);border-radius:3px;overflow:hidden}.f{height:100%;background:var(--ac);transition:width .4s}
+.r.on .f{background:var(--mk)}.r.on span:first-child{font-weight:600}
+.note{color:var(--mu);font-size:13px;margin-top:18px}
+.lv{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:14px}.lv i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px}
+</style></head><body><div class="w">
+<h1>Generative AI Readiness Score: Indian SME companies</h1>
+<p class="sub">Which industries are ready to adopt generative AI? Pick an industry to filter, or click a bar.</p>
+<div class="bar"><label for="ind">Industry</label><select id="ind"></select><button id="rs">Show all</button></div>
+<div class="cards" id="cards"></div>
+<div class="g"><div class="p"><h2>Average score by industry</h2><div id="ib"></div></div>
+<div class="p"><h2>Score by parameter</h2><div id="pb"></div><h2 style="margin-top:22px">Readiness levels</h2><svg id="dn" viewBox="0 0 120 120" width="150" height="150" role="img" aria-label="Readiness levels donut"></svg><div class="lv" id="lv"></div></div></div>
+<p class="note">All 100 company records are synthetic, generated for this project. Scores are 0-100; weights: Data Maturity 30%, Digital Infrastructure 25%, Skills 25%, Leadership 20%.</p>
+</div>
+<script>
+const D=[["IT Services", 85, 83, 77, 84, 82.3, "Advanced"], ["Fintech", 84, 83, 74, 73, 79.1, "Advanced"], ["E-commerce", 74, 86, 56, 64, 70.5, "Ready"], ["Healthcare", 74, 56, 47, 48, 57.6, "Developing"], ["Education", 59, 55, 50, 54, 54.8, "Developing"], ["Retail", 31, 47, 37, 58, 41.9, "Developing"], ["Logistics", 50, 60, 56, 58, 55.6, "Developing"], ["Manufacturing", 54, 39, 24, 50, 42.0, "Developing"], ["Textiles", 31, 22, 31, 35, 29.6, "Beginner"], ["Agriculture", 30, 38, 25, 54, 35.6, "Beginner"], ["IT Services", 87, 69, 75, 72, 76.5, "Advanced"], ["Fintech", 81, 98, 74, 67, 80.7, "Advanced"], ["E-commerce", 79, 69, 61, 73, 70.8, "Ready"], ["Healthcare", 41, 45, 45, 60, 46.8, "Developing"], ["Education", 53, 32, 58, 52, 48.8, "Developing"], ["Retail", 46, 60, 38, 51, 48.5, "Developing"], ["Logistics", 68, 68, 44, 37, 55.8, "Developing"], ["Manufacturing", 48, 47, 37, 31, 41.6, "Developing"], ["Textiles", 48, 42, 38, 29, 40.2, "Developing"], ["Agriculture", 42, 47, 46, 25, 40.9, "Developing"], ["IT Services", 85, 88, 91, 68, 83.9, "Advanced"], ["Fintech", 73, 77, 66, 56, 68.9, "Ready"], ["E-commerce", 59, 76, 60, 84, 68.5, "Ready"], ["Healthcare", 53, 42, 39, 64, 49.0, "Developing"], ["Education", 54, 51, 44, 44, 48.8, "Developing"], ["Retail", 58, 53, 53, 52, 54.3, "Developing"], ["Logistics", 43, 57, 41, 34, 44.2, "Developing"], ["Manufacturing", 39, 48, 51, 52, 46.9, "Developing"], ["Textiles", 40, 32, 25, 27, 31.7, "Beginner"], ["Agriculture", 31, 24, 32, 44, 32.1, "Beginner"], ["IT Services", 60, 86, 90, 77, 77.4, "Advanced"], ["Fintech", 93, 78, 88, 68, 83.0, "Advanced"], ["E-commerce", 83, 59, 62, 67, 68.6, "Ready"], ["Healthcare", 60, 48, 45, 42, 49.7, "Developing"], ["Education", 45, 73, 45, 43, 51.6, "Developing"], ["Retail", 35, 55, 42, 49, 44.6, "Developing"], ["Logistics", 57, 57, 50, 45, 52.9, "Developing"], ["Manufacturing", 52, 47, 34, 35, 42.9, "Developing"], ["Textiles", 37, 28, 21, 46, 32.6, "Beginner"], ["Agriculture", 30, 25, 5, 42, 24.9, "Beginner"], ["IT Services", 73, 82, 73, 73, 75.3, "Advanced"], ["Fintech", 66, 82, 60, 96, 74.5, "Ready"], ["E-commerce", 66, 87, 66, 64, 70.9, "Ready"], ["Healthcare", 62, 61, 52, 64, 59.7, "Developing"], ["Education", 45, 50, 57, 46, 49.5, "Developing"], ["Retail", 53, 56, 50, 49, 52.2, "Developing"], ["Logistics", 50, 54, 57, 47, 52.2, "Developing"], ["Manufacturing", 40, 54, 38, 46, 44.2, "Developing"], ["Textiles", 40, 41, 45, 47, 42.9, "Developing"], ["Agriculture", 36, 25, 36, 48, 35.7, "Beginner"], ["IT Services", 77, 74, 90, 63, 76.7, "Advanced"], ["Fintech", 73, 70, 78, 74, 73.7, "Ready"], ["E-commerce", 78, 58, 64, 79, 69.7, "Ready"], ["Healthcare", 72, 62, 44, 65, 61.1, "Ready"], ["Education", 70, 66, 65, 69, 67.6, "Ready"], ["Retail", 42, 58, 40, 61, 49.3, "Developing"], ["Logistics", 54, 70, 65, 52, 60.4, "Ready"], ["Manufacturing", 48, 40, 20, 54, 40.2, "Developing"], ["Textiles", 46, 22, 30, 45, 35.8, "Beginner"], ["Agriculture", 29, 33, 9, 44, 28.0, "Beginner"], ["IT Services", 72, 77, 75, 70, 73.6, "Ready"], ["Fintech", 64, 72, 59, 74, 66.8, "Ready"], ["E-commerce", 83, 65, 64, 69, 71.0, "Ready"], ["Healthcare", 50, 69, 50, 43, 53.4, "Developing"], ["Education", 77, 57, 43, 38, 55.7, "Developing"], ["Retail", 42, 45, 38, 56, 44.6, "Developing"], ["Logistics", 68, 45, 56, 42, 54.1, "Developing"], ["Manufacturing", 54, 48, 46, 37, 47.1, "Developing"], ["Textiles", 20, 22, 42, 30, 28.0, "Beginner"], ["Agriculture", 12, 22, 28, 24, 20.9, "Beginner"], ["IT Services", 75, 97, 68, 71, 78.0, "Advanced"], ["Fintech", 77, 86, 71, 70, 76.4, "Advanced"], ["E-commerce", 72, 83, 57, 75, 71.6, "Ready"], ["Healthcare", 46, 65, 52, 55, 54.1, "Developing"], ["Education", 65, 32, 42, 55, 49.0, "Developing"], ["Retail", 48, 53, 36, 51, 46.9, "Developing"], ["Logistics", 76, 44, 25, 48, 49.7, "Developing"], ["Manufacturing", 56, 51, 44, 41, 48.8, "Developing"], ["Textiles", 28, 50, 28, 60, 39.9, "Beginner"], ["Agriculture", 15, 31, 49, 41, 32.7, "Beginner"], ["IT Services", 80, 81, 82, 71, 79.0, "Advanced"], ["Fintech", 70, 68, 71, 86, 73.0, "Ready"], ["E-commerce", 81, 69, 69, 61, 71.0, "Ready"], ["Healthcare", 61, 49, 48, 49, 52.4, "Developing"], ["Education", 55, 39, 66, 51, 53.0, "Developing"], ["Retail", 54, 51, 36, 55, 49.0, "Developing"], ["Logistics", 61, 44, 31, 58, 48.7, "Developing"], ["Manufacturing", 62, 38, 24, 49, 43.9, "Developing"], ["Textiles", 39, 55, 30, 48, 42.6, "Developing"], ["Agriculture", 28, 29, 31, 29, 29.2, "Beginner"], ["IT Services", 68, 98, 73, 63, 75.8, "Advanced"], ["Fintech", 76, 87, 62, 70, 74.1, "Ready"], ["E-commerce", 67, 83, 63, 79, 72.4, "Ready"], ["Healthcare", 69, 55, 44, 64, 58.3, "Developing"], ["Education", 46, 64, 68, 44, 55.6, "Developing"], ["Retail", 54, 56, 47, 56, 53.2, "Developing"], ["Logistics", 47, 54, 55, 50, 51.4, "Developing"], ["Manufacturing", 30, 47, 31, 40, 36.5, "Beginner"], ["Textiles", 43, 36, 25, 35, 35.2, "Beginner"], ["Agriculture", 20, 34, 17, 23, 23.4, "Beginner"]];const P=["Data Maturity","Digital Infrastructure","Skills and Talent","Leadership and Budget"];
+const L=["Beginner","Developing","Ready","Advanced"],LC=["#B45309","#F2A900","#0F766E","#14213D"];
+let sel="All";const $=i=>document.getElementById(i);
+const inds=[...new Set(D.map(r=>r[0]))];
+$("ind").innerHTML='<option>All</option>'+inds.map(i=>`<option>${i}</option>`).join("");
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+function draw(){
+ const s=sel==="All"?D:D.filter(r=>r[0]===sel);
+ const sc=avg(s.map(r=>r[5])),rd=s.filter(r=>r[6]==="Ready"||r[6]==="Advanced").length;
+ const pa=P.map((p,i)=>avg(s.map(r=>r[1+i]))),low=P[pa.indexOf(Math.min(...pa))];
+ $("cards").innerHTML=[[s.length,"Companies"],[sc.toFixed(1),"Average readiness score"],[Math.round(rd/s.length*100)+"%","Ready or Advanced"],[low,"Weakest parameter"]].map(([n,l])=>`<div class="c"><div class="n" style="${l=="Weakest parameter"?"font-size:20px;padding:10px 0":""}">${n}</div><div class="l">${l}</div></div>`).join("");
+ const ia=inds.map(i=>[i,avg(D.filter(r=>r[0]===i).map(r=>r[5]))]).sort((a,b)=>b[1]-a[1]);
+ $("ib").innerHTML=ia.map(([i,v])=>`<button class="r ${sel===i?"on":""}" data-i="${i}"><span>${i}</span><span class="t"><span class="f" style="display:block;width:${v}%"></span></span><span>${v.toFixed(1)}</span></button>`).join("");
+ $("pb").innerHTML=P.map((p,i)=>`<div class="r p0" style="cursor:default"><span>${p}</span><span class="t"><span class="f" style="display:block;width:${pa[i]}%"></span></span><span>${pa[i].toFixed(1)}</span></div>`).join("");
+ const cn=L.map(l=>s.filter(r=>r[6]===l).length);let off=0;const C=2*Math.PI*40;
+ $("dn").innerHTML=cn.map((n,i)=>{const len=n/s.length*C;const e=`<circle cx="60" cy="60" r="40" fill="none" stroke="${LC[i]}" stroke-width="22" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"/>`;off+=len;return e}).join("");
+ $("lv").innerHTML=L.map((l,i)=>`<span><i style="background:${LC[i]}"></i>${l}: ${cn[i]}</span>`).join("");
+ document.querySelectorAll("#ib .r").forEach(b=>b.onclick=()=>{sel=sel===b.dataset.i?"All":b.dataset.i;$("ind").value=sel;draw()});
+}
+$("ind").onchange=e=>{sel=e.target.value;draw()};$("rs").onclick=()=>{sel="All";$("ind").value="All";draw()};draw();
+</script></body></html>
